@@ -1,0 +1,9 @@
+Hindi
+Mandarin
+French
+Cantonese
+English
+Italian
+German
+Japanese
+Spanish

@@ -1,6 +1,6 @@
 import math
-
-def createvector():
+## the createfile function reads from movie-info.txt and creates the universal set for each feature and writes them into files with names corresponding to the feature
+def createfiles():
   
   actors={}
   directors={}
@@ -10,15 +10,15 @@ def createvector():
   languages={}
   countries={}
   companies={}
-  f_actor = open("/Users/adas/imdbcode/unionfeatures/actors.txt","w")
-  f_dir = open("/Users/adas/imdbcode/unionfeatures/directors.txt","w")
-  f_prod = open("/Users/adas/imdbcode/unionfeatures/producers.txt","w")
-  f_genres = open("/Users/adas/imdbcode/unionfeatures/genres.txt","w")
-  f_county = open("/Users/adas/imdbcode/unionfeatures/countries.txt","w")
-  f_lang = open("/Users/adas/imdbcode/unionfeatures/languages.txt","w")
-  f_comp = open("/Users/adas/imdbcode/unionfeatures/prodcomps.txt","w")
+  f_actor = open("./actors.txt","w")
+  f_dir = open("./directors.txt","w")
+  f_prod = open("./producers.txt","w")
+  f_genres = open("./genres.txt","w")
+  f_county = open("./countries.txt","w")
+  f_lang = open("./languages.txt","w")
+  f_comp = open("./prodcomps.txt","w")
 
-  f = open("/Users/adas/imdbcode/imdbpy/movie-info.txt","r")
+  f = open("./movie-info.txt","r")
   sentence=f.readlines()
 
   for index in range(0,len(sentence)):
@@ -92,10 +92,7 @@ def createvector():
 
      j = j+2
 ###Production Companies
-     #npc=len(movie[j].split(":")[1].split(","))
-
-     #for i in range(0,npc):
-     #  temp=movie[j].split(":")[1].split(",")[i].strip("[,',]")
+     
      temp=movie[j].split(":")[1].split(",")[0].strip("[,',]")
      temp=temp.replace("']\n",'')
    
@@ -127,4 +124,4 @@ def createvector():
          f_comp.write(i+"\n")
 
 print "starting..."
-createvector()  
+createfiles()  
