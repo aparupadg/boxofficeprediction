@@ -1,14 +1,14 @@
 import math
 import cPickle as pickle
 
-## createvector function creates the vectors for the training dataset
+##createvector function creates the vectors for the training dataset
 
-def createvector():
+def createmodel():
   from sklearn import linear_model
   import imdb
   ia=imdb.IMDb()
 
-  f_y = open("./movies.txt","r")
+  f_y = open("./movie-info.txt","r")
   f_actor = open("./actors.txt","r")
   f_dir = open("./directors.txt","r")
   f_prod = open("./producers.txt","r")
@@ -95,42 +95,31 @@ def createvector():
   
   feature.append("year")
   
-## Y is the target variable for the training data set
+##Y is the target variable for the training data set
   Y=[]
 ##Dictionary for budget by movie names as key
   profit={}
   wgross={}
   budget={}
-  for i in range(1,lenbudget):
-    title=y_budget[i].strip().split("\t")[1] 
-    gross=y_budget[i].strip().split("\t")[4].strip("$")
-    bget=y_budget[i].strip().split("\t")[2].strip("$")
-    gross=float(gross.replace(',',''))
-    bget=float(bget.replace(',',''))
-    wgross[title]=gross
-    budget[title]=bget
-    temp=gross-bget
-    if temp>0:
-      profit[title]=1
-    else:
-      profit[title]=0
-   
-   
     
-    
-  #Xmovienames={}
-  #Xindex=0
-  # X is the matrix  of feature vectors of all the training movie titles     
+##X is the matrix  of feature vectors of all the training movie titles    
   X=[]
   f = open("movie-info.txt","r")
   sentence=f.readlines()
   no_loss=0
   for index in range(0,len(sentence)):
-  
+      
      movie_vector=[0]*N
      movie=sentence[index]
      movie=movie.split('\t')
-   
+     title=movie[0]
+     budget[title]=float(movie[7].split(":")[1])
+     wgross[title]=float(movie[11].split(":")[1])
+     if wgross[title]-budget[title]>0:
+        profit[title]=1
+     else:
+        profit[title]=0
+
      if (budget[movie[0]]<= 0) or (wgross[movie[0]]<=0):
         continue
 
@@ -138,13 +127,13 @@ def createvector():
        no_loss=no_loss+1
 
      Y.append(profit[movie[0]])
-     #Xmovienames[Xindex] = movie[0]
+     
 
      j=1  
      
-     movie_vector[0]=float(movie[j].split(":")[1])
+     movie_vector[j-1]=float(movie[j].split(":")[1])
      j=j+1
-     movie_vector[1]=float(movie[j].split(":")[1])
+     movie_vector[j-1]=float(movie[j].split(":")[1])
      j=j+1
 ###languages
      nlan=len(movie[j].split(":")[1].split(","))
@@ -181,7 +170,7 @@ def createvector():
        temp=movie[j].split(":")[1].split(",")[i].strip("[,',] ")
        if temp in dict_genres.keys():
            movie_vector[dict_genres[temp]]=1
-     j=j+1
+     j=j+2
 
 
 ###Director
@@ -202,10 +191,10 @@ def createvector():
       
        if temp in dict_actor.keys():
            movie_vector[dict_actor[temp]]=1
-     j=j+1
+     j=j+3
 
 ###Production Companies
-     j=j+1
+     
      
      npc=len(movie[j].split(":")[1].split(","))
 
@@ -214,30 +203,24 @@ def createvector():
         if temp in dict_prodcomp.keys():
            movie_vector[dict_prodcomp[temp]]=1
          
-     j=j-1
+     j=j-2
 ###Year
      
      movie_vector[N-1]=int(float(movie[j].split(":")[1]))
      X.append(movie_vector)
      #Xindex = Xindex+1
   total=len(Y)   
-  fr=float(no_loss)/total  
-  #print "fraction loss : " + str(fr)
-  #print "loss :" + str(no_loss) 
-  #print "total :" + str(total)     
-  
+    
 
   import numpy as np
-  from sklearn.linear_model import Lasso
-  from sklearn.linear_model import LogisticRegression
-  from sklearn.svm import LinearSVC
-  from sklearn.svm import SVC 
   
-  #lasso = Lasso(alpha=0.03, normalize=True, fit_intercept=True, max_iter=100000)
-  #svm = LinearSVC(C=0.5, penalty='l2', loss='l2', dual=False, fit_intercept=True)
-  svm = LinearSVC(C=0.15, penalty='l1', loss='l2', dual=False, fit_intercept=True)
-  #svm = LogisticRegression(C=0.5, penalty='l2', dual=False, fit_intercept=True)
-  #svm = SVC(C=1.0, cache_size=200, class_weight=None, coef0=0.0, degree=3, gamma=0.0, kernel='rbf', max_iter=-1, probability=False, random_state=None, shrinking=True, verbose=False)
+  from sklearn.svm import LinearSVC
+  from sklearn.linear_model import LogisticRegression 
+  
+  svm = LogisticRegression(C=0.5, penalty='l1', dual=False, fit_intercept=True)
+
+#  svm = LinearSVC(C=0.15, penalty='l1', loss='l2', dual=False, fit_intercept=True)
+  
 
   n_samples = len(X)  
   #Split data into train and test sets
@@ -247,10 +230,13 @@ def createvector():
   svm_model = svm.fit(X_train, y_train) 
   y_pred_svm = svm_model.predict(X_test)
   y_pred_svm_train = svm_model.predict(X_train)
+  
+  per=(sum(y_pred_svm)*100)/sum(y_test)
+  print "Percentage accuracy on test data: " +str(per)
   pickle.dump(svm, open("svm_model", 'wb'))
    
   numnonzero=0
  
   
 "starting..."
-createvector()  
+createmodel()  

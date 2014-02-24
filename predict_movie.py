@@ -3,10 +3,9 @@ import cPickle as pickle
 import imdb
 from sklearn import linear_model
 import numpy as np
-from sklearn.linear_model import Lasso
-from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
-from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+
 ia=imdb.IMDb()
 
 N=0
@@ -18,11 +17,11 @@ dict_genres={}
 dict_dir={}
 dict_prodcomp={}
 
-#initialize function assigns an index to each feature.  
-
+#initialize function assigns an index to each feature. 
 def initialize():
- 
-  f_y = open("./movies.txt","r")
+  
+
+  f_y = open("./movie-info.txt","r")
   f_actor = open("./actors.txt","r")
   f_dir = open("./directors.txt","r")
   f_prod = open("./producers.txt","r")
@@ -48,66 +47,68 @@ def initialize():
   y_budget=f_y.readlines()
   lenbudget=len(y_budget)  
 
-## Feature Vector Components    
-## Rating | Votes | Languages |Producer | Country | Genres |Directors | Actors | Product_Comp  |Year_of_release (1970-2014)  
+    
+##Actor |Director |Producer |Genres |Country |Language |Product_Comp  |Year_of_release (1970-2014) |Rating |Votes 
   global N
-  N=1+1+lenactor+lendirector+lenproducer+lengenre+lencountry+lenlanguage+lenprod_company+1
+  N=1+1+lenactor+lendirector+lenproducer+lengenre+lencountry+lenlanguage+1 +lenprod_company
   
-  index=2
+  count=2
   
+
   for line in language:
     temp=line.strip()
-    dict_lang[temp]=index
-    index=index+1
+    dict_lang[temp]=count
+    count=count+1
 
  
   for line in producer:
     temp=line.strip()
-    dict_prod[temp]=index
-    index=index+1
+    dict_prod[temp]=count
+    count=count+1
 
- 
+  
   for line in country:
     temp=line.strip()
-    dict_county[temp]=index
-    index=index+1
+    dict_county[temp]=count
+    count=count+1
   
 
   for line in genre:
     temp=line.strip()
-    dict_genres[temp]=index
-    index=index+1
+    dict_genres[temp]=count
+    count=count+1
 
- 
   for line in director:
     temp=line.strip()
-    dict_dir[temp]=index
-    index=index+1
+    dict_dir[temp]=count
+    count=count+1
 
   for line in actor:
     temp=line.strip()
-    dict_actor[temp]=index
-    index=index+1
+    dict_actor[temp]=count
+    count=count+1
 
- 
   for line in prod_company:
     temp=line.strip()
-    dict_prodcomp[temp]=index
+    dict_prodcomp[temp]=count
+    count=count+1
+  
+# index N-1 is for the feature corresponding to "year" 
     
-
- # index N-1 is for the feature corresponding to "year" 
-    
-# create function creates the feature vector by taking the title of a movie     
+# create function creates the feature vector by taking the title of a movie      
+     
 def create(title):    
     
  
-  # X is the feature vector corresponding to the movie "title"
-  X=[0]*N
+  Xindex=0   
+  X=[]
+
+  movie_vector=[0]*N
   
   try:
-      movieID=ia.search_movie(title)[0].movieID 
+      movieID=ia.search_movie(title)[0].movieID
       movie=ia.get_movie(movieID)
-      print "closest match for movie found: " + str(movie)
+      print "Closest matching movie found: " + str(movie)
       year=movie["year"]
       votes=movie["votes"]
       ratings=movie["rating"]
@@ -127,9 +128,9 @@ def create(title):
   
  
      
-  X[0]=float(movie["rating"])
+  movie_vector[0]=float(movie["rating"])
  
-  X[1]=float(movie["votes"])
+  movie_vector[1]=float(movie["votes"])
  
 
 ###languages
@@ -137,7 +138,7 @@ def create(title):
   temp=str(movie["languages"][0])
 
   if temp in dict_lang.keys():
-           X[dict_lang[temp]]=1
+           movie_vector[dict_lang[temp]]=1
 
  
 
@@ -147,7 +148,7 @@ def create(title):
   for i in range(0,nprod):
        temp=str(movie["producer"][i])
        if temp in dict_prod.keys():
-           X[dict_prod[temp]]=1
+           movie_vector[dict_prod[temp]]=1
  
 
 ###Countries
@@ -157,7 +158,7 @@ def create(title):
   for i in range(0,ncount):
        county=temp[i]
        if county in dict_county.keys():
-           X[dict_county[county]]=1
+           movie_vector[dict_county[county]]=1
  
 
 ###Genres
@@ -167,7 +168,7 @@ def create(title):
   for i in range(0,ngenre):
        tp=temp[i]
        if tp in dict_genres.keys():
-           X[dict_genres[tp]]=1
+           movie_vector[dict_genres[tp]]=1
  
 
 
@@ -177,7 +178,7 @@ def create(title):
   for i in range(0,ndict):
        temp=str(movie["director"][i])
        if temp in dict_dir.keys():
-           X[dict_dir[temp]]=1
+           movie_vector[dict_dir[temp]]=1
  
 
 ###Cast
@@ -187,7 +188,7 @@ def create(title):
        temp=str(movie["cast"][i])
        
        if temp in dict_actor.keys():
-           X[dict_actor[temp]]=1
+           movie_vector[dict_actor[temp]]=1
  
 
 ###Production Companies
@@ -198,25 +199,25 @@ def create(title):
   for i in range(0,npc):
       temp=str(movie["production companies"][i])
       if temp in dict_prodcomp.keys():
-           X[dict_prodcomp[temp]]=1
+           movie_vector[dict_prodcomp[temp]]=1
          
  
 ###Year
      
-  X[N-1]=movie["year"]
+  movie_vector[N-1]=movie["year"]
 
- 
+  X=movie_vector
 
   return(X) 
 
 
-## main function takes a movie title from the user and prints the box-office prediction "HIT" or "FLOP" 
+
 def main():
   model = pickle.load(open("svm_model", 'rb'))
   initialize()
 
   while True:
-    user_input = raw_input("Enter movie title for prediction or enter 'quit' to exit:")
+    user_input = raw_input("Enter a hollywood movie name or 'quit' :")
     if user_input == "quit":
         break
     X=create(user_input)

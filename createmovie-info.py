@@ -35,7 +35,8 @@ def create_dict(movie_object):
 
 
 def union():
-  f = open("./movies.txt","r")
+  f=open("./movies-years.txt", "r")   
+  
   sentences = f.readlines()
   ia=imdb.IMDb()
   genres={}
@@ -48,12 +49,14 @@ def union():
   countries_write=open("countries.txt",'w')
   production_comps_write=open("production_comp.txt",'w')
   count=0
-  for line in sentences[1:]:
   
+  for title in sentences:
+    
+
     try:
-      title=line.split("\t")[1]
+      title=title.strip("\n")
       movieID=ia.search_movie(title)[0].movieID
-      print "movieID is "+str(movieID)
+      print "movie title is "+ title
       movie=ia.get_movie(movieID)
       genre=map(str,movie["genres"])
       language=map(str,movie["languages"])
@@ -72,7 +75,7 @@ def union():
          production_comps[production_comp[index].companyID]=0
 
       count=count+1
-      print count
+      
       movie_dict = {}
       movie_object = movie
       movie_dict["cast"]=[]
@@ -98,6 +101,16 @@ def union():
 
       for index in range(0,len(movie_object["production companies"])):
         movie_dict["production companies"].append(str(movie_object["production companies"][index]))
+     
+      ia.update(movie_object, 'business')
+      wgross=movie_object["business"]["gross"][0]
+      wgross=wgross.split(' ')[0].strip('$')
+      wgross=float(wgross.replace(',',''))
+      movie_dict["gross"]=wgross
+      bget=movie_object["business"]["budget"][0]
+      bget=bget.split(' ')[0].strip('$')
+      bget=float(bget.replace(',',''))
+      movie_dict["budget"]=bget
 
       info = title;
       for keys,values in movie_dict.items():
@@ -105,11 +118,8 @@ def union():
       
       movies_write.write(info+"\n")
 
-
-
-
     except:
-      print "exception: "+line
+      print "exception: "+title
 
   for keys,values in genres.items():
     genres_write.write(keys+"\n")

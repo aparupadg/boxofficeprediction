@@ -6,9 +6,9 @@ Music
 Comedy
 War
 Horror
-Adventure
-Thriller
 Western
+Thriller
+Adventure
 Mystery
 Drama
 Action

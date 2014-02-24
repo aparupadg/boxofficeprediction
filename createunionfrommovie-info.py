@@ -1,6 +1,6 @@
 import math
-## the createfile function reads from movie-info.txt and creates the universal set for each feature and writes them into files with names corresponding to the feature
-def createfiles():
+##the createfile function reads from movie-info.txt and creates the universal set for each feature and writes them into files with names corresponding to the feature
+def createvector():
   
   actors={}
   directors={}
@@ -20,7 +20,6 @@ def createfiles():
 
   f = open("./movie-info.txt","r")
   sentence=f.readlines()
-
   for index in range(0,len(sentence)):
      movie=sentence[index]
      movie=movie.split('\t')
@@ -28,7 +27,6 @@ def createfiles():
 ###languages
      nlan=len(movie[j].split(":")[1].split(","))
      temp=movie[j].split(":")[1].split(",")[0].strip("[,',] ")
-     #print "lang= " + str(temp)
      if temp in languages.keys():
            languages[temp] = languages[temp] + 1
      else:
@@ -38,7 +36,8 @@ def createfiles():
 ###Producer
      nprod=len(movie[j].split(":")[1].split(","))
      for i in range(0,nprod):
-       temp=movie[j].split(":")[1].split(",")[i].strip("[,',],']")
+       temp=movie[j].split(":")[1].split(",")[i].strip("[,',]")
+       temp=temp.strip(" '")
        if temp in producers.keys():
            producers[temp] = producers[temp] + 1
        else:
@@ -67,7 +66,7 @@ def createfiles():
            genres[temp] = 1
 
 
-     j = j+1
+     j = j+2
 ###Director
      ndict=len(movie[j].split(":")[1].split(","))
 
@@ -90,19 +89,19 @@ def createfiles():
        else:
            actors[temp] = 1
 
-     j = j+2
+     j = j+3
 ###Production Companies
      
      temp=movie[j].split(":")[1].split(",")[0].strip("[,',]")
      temp=temp.replace("']\n",'')
-   
+      
      if temp in companies.keys():
            companies[temp] = companies[temp] + 1
      else:
            companies[temp] = 1
      
   for i in actors.keys():
-     if (actors[i] > 5):
+     if (actors[i] > 3):
          f_actor.write(i+"\n")
   for i in producers.keys():
      if (producers[i] > 3):
@@ -124,4 +123,4 @@ def createfiles():
          f_comp.write(i+"\n")
 
 print "starting..."
-createfiles()  
+createvector()  
