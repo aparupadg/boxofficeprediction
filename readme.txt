@@ -1,8 +1,7 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1038\cocoasubrtf360
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-\margl1440\margr1440\vieww9000\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+There are four .py files:
+1) createmovie-info.py reads movies title from movies-years.txt, looks up IMDB using the imdbpy library, and saves the corresponding features for the movie in movie-info.txt
+2) createunionfrommovie-info.py reads from the file movie-info.txt and creates the union set of all actors, directors, countries, genres, languages, producers, production company etc. and writes them in .txt files with the corresponding name of the feature
+3) createmodel.py reads the training dataset from movie-info.txt and creates the model 
+4) predict_movie.py takes the title of the movie from the user creates the corresponding feature vector, uses the model for predicting box-office success
 
-\f0\fs24 \cf0   RUN file predict_movie.py\
-}
+RUN the file predict_movie.py with the name of the movie to obtain the prediction (HIT or FLOP)
