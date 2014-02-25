@@ -217,9 +217,9 @@ def createmodel():
   from sklearn.svm import LinearSVC
   from sklearn.linear_model import LogisticRegression 
   
-  svm = LogisticRegression(C=0.5, penalty='l1', dual=False, fit_intercept=True)
+# svm = LogisticRegression(C=0.5, penalty='l1', dual=False, fit_intercept=True)
 
-#  svm = LinearSVC(C=0.15, penalty='l1', loss='l2', dual=False, fit_intercept=True)
+  svm = LinearSVC(C=0.15, penalty='l1', loss='l2', dual=False, fit_intercept=True)
   
 
   n_samples = len(X)  
@@ -230,8 +230,9 @@ def createmodel():
   svm_model = svm.fit(X_train, y_train) 
   y_pred_svm = svm_model.predict(X_test)
   y_pred_svm_train = svm_model.predict(X_train)
-  
-  per=(sum(y_pred_svm)*100)/sum(y_test)
+  incorr_pred=abs(y_pred_svm-y_test)
+  frac_corr=1-(sum(incorr_pred)*(1.0)/len(y_test))
+  per=frac_corr*100
   print "Percentage accuracy on test data: " +str(per)
   pickle.dump(svm, open("svm_model", 'wb'))
    
