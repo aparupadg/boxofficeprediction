@@ -1,6 +1,6 @@
 import math
-##the createfile function reads from movie-info.txt and creates the universal set for each feature and writes them into files with names corresponding to the feature
-def createvector():
+
+def union():
   
   actors={}
   directors={}
@@ -101,26 +101,26 @@ def createvector():
            companies[temp] = 1
      
   for i in actors.keys():
-     if (actors[i] > 3):
+      if (actors[i] > 3):
          f_actor.write(i+"\n")
   for i in producers.keys():
-     if (producers[i] > 3):
+      if (producers[i] > 3):
          f_prod.write(i+"\n")
   for i in directors.keys():
-     if (directors[i] > 3):
+      if (directors[i] > 3):
          f_dir.write(i+"\n")
   for i in genres.keys():
-     if (genres[i] > 3):
+      if (genres[i] > 3):
          f_genres.write(i+"\n")
   for i in countries.keys():
-     if (countries[i] > 5):
+      if (countries[i] > 5):
          f_county.write(i+"\n")
   for i in languages.keys():
-     if (languages[i] > 5):
+      if (languages[i] > 5):
          f_lang.write(i+"\n")
   for i in companies.keys():
-     if (companies[i] > 5):
+      if (companies[i] > 5):
          f_comp.write(i+"\n")
 
 print "starting..."
-createvector()  
+union()  
