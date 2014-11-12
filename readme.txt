@@ -1,7 +1,5 @@
 RUN file predict_movie.py
 
-movie_names.txt   ###Contains the list of names of movies collected from wikipedia
-
 predict_movie.py  ###  Takes movie name as input, builds the corresponding feature vector, and uses the fitted logistic regression or SVM model to predict the box office success 
 
 createmovie-info.py  ###Reads the names of movies collected from wikipedia and saved in movie_names.txt.  For each movie it collects information from IMDB database and saves in movie-info.txt
