@@ -1,6 +1,8 @@
+# Takes movie name as input, builds the corresponding feature vector, and uses the fitted logistic regression or SVM model to predict the box office success 
+
 import math
 import cPickle as pickle
-import imdb
+import imdb 
 from sklearn import linear_model
 import numpy as np
 from sklearn.svm import LinearSVC
@@ -20,7 +22,7 @@ dict_prodcomp={}
 #initialize function assigns an index to each feature. 
 def initialize():
   
-
+  ###### Building the feature index space ##########
   f_y = open("./movie-info.txt","r")
   f_actor = open("./actors.txt","r")
   f_dir = open("./directors.txt","r")
@@ -47,8 +49,7 @@ def initialize():
   y_budget=f_y.readlines()
   lenbudget=len(y_budget)  
 
-    
-##Actor |Director |Producer |Genres |Country |Language |Product_Comp  |Year_of_release (1970-2014) |Rating |Votes 
+  #### Rating |Votes |Language |Producer |Country |Genres |Director |Actor |Product_Comp  |Year_of_release (1970-2014) ##########
   global N
   N=1+1+lenactor+lendirector+lenproducer+lengenre+lencountry+lenlanguage+1 +lenprod_company
   
@@ -108,10 +109,12 @@ def create(title):
   try:
       movieID=ia.search_movie(title)[0].movieID
       movie=ia.get_movie(movieID)
-      print "Closest matching movie found: " + str(movie)
+      print "Closest matching movie found: " + str(movie) + " released in "+str(movie["year"])
       year=movie["year"]
       votes=movie["votes"]
       ratings=movie["rating"]
+      print "rating "+ str(ratings)
+      print "votes "+str(votes)
       genre=map(str,movie["genres"])
       language=map(str,movie["languages"])
       country=map(str,movie["countries"])
@@ -213,7 +216,7 @@ def create(title):
 
 
 def main():
-  model = pickle.load(open("svm_model", 'rb'))
+  model = pickle.load(open("model", 'rb'))
   initialize()
 
   while True:

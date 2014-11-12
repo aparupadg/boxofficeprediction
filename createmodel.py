@@ -1,12 +1,13 @@
+# Builds the logistic regression or linear SVM models
+# For every feature evaluates average number of hits and average revenue associated with movies in which that feature is present   
+
 import math
 import cPickle as pickle
 
 
 def createmodel():
   from sklearn import linear_model
-  import imdb
-  ia=imdb.IMDb()
-
+  ####### Reading the features to build the feature index space ############# 
   f_y = open("./movie-info.txt","r")
   f_actor = open("./actors.txt","r")
   f_dir = open("./directors.txt","r")
@@ -33,9 +34,11 @@ def createmodel():
   y_budget=f_y.readlines()
   lenbudget=len(y_budget)  
 
-    
-##Actor |Director |Producer |Genres |Country |Language |Product_Comp  |Year_of_release (1970-2014) |Rating |Votes 
+  ######## Assigning index to the features #########
+  ######## Except Rating, Votes, and Year of release, all other features are binary 0/1 variables (dummy coding) ##########  
+  ######## Rating |Votes |Language |Producer |Country |Genres |Director |Actor |Product_Comp  |Year_of_release (1970-2014) ############
   N=1+1+lenactor+lendirector+lenproducer+lengenre+lencountry+lenlanguage+1 +lenprod_company
+ 
   feature=[]
   feature.append("rating"+",Metric")
   feature.append("votes"+",Metric")
@@ -97,17 +100,16 @@ def createmodel():
   Movie_title=[]
   Movie_budget=[]
   Movie_gross=[]
-##Y is the target variable for the training data set
+  ########Y is the target variable for the training data set#######
   Y=[]
-##Dictionary for budget by movie names as key
+  ########Dictionary for budget by movie names as key########
   profit={}
   wgross={}
   budget={}
     
-##X is the matrix  of feature vectors of all the training movie titles    
+  ####### X is the matrix  of feature vectors of all the training movie titles ########    
   X=[]
   f = open("movie-info.txt","r")
-  sentence=f.readlines()
   no_loss=0
  
   
@@ -115,10 +117,9 @@ def createmodel():
   total_count=[0]*N
   hits=[0]*N
 
-  for index in range(0,len(sentence)):
-      
+  for movie in f:
+     
      movie_vector=[0]*N
-     movie=sentence[index]
      movie=movie.split('\t')
      title=movie[0]
      Movie_title.append(str(title))
@@ -126,6 +127,7 @@ def createmodel():
      wgross[title]=float(movie[11].split(":")[1])
      Movie_budget.append(str(budget[title]))
      Movie_gross.append(str(wgross[title]))
+     #### Creating labels for hit and flop class #####
      if wgross[title]-budget[title]>0:
         profit[title]=1
      else:
@@ -147,7 +149,8 @@ def createmodel():
      j=j+1
      movie_vector[j-1]=float(movie[j].split(":")[1])
      j=j+1
-###languages
+
+     ######languages#######
      nlan=len(movie[j].split(":")[1].split(","))
      
      temp=movie[j].split(":")[1].split(",")[0].strip("[,',] ")
@@ -169,7 +172,7 @@ def createmodel():
                total_count[dict_lang[temp]]=1
 
      j=j+1
-###Producer
+     ######Producer######
      nprod=len(movie[j].split(":")[1].split(","))
     
      for i in range(0,nprod):
@@ -191,7 +194,7 @@ def createmodel():
 
      j=j+1
 
-###Countries
+     ######Countries#######
      ncount=len(movie[j].split(":")[1].split(","))
 
      for i in range(0,ncount):
@@ -216,7 +219,7 @@ def createmodel():
 
      j=j+1
 
-###Genres
+     ########Genres#######
      ngenre=len(movie[j].split(":")[1].split(","))
 
      for i in range(0,ngenre):
@@ -240,7 +243,7 @@ def createmodel():
      j=j+2
 
 
-###Director
+     ########Director########
      ndict=len(movie[j].split(":")[1].split(","))
 
 
@@ -262,7 +265,7 @@ def createmodel():
 
      j=j+1
 
-###Cast
+     ###########Cast############
      ncast=len(movie[j].split(":")[1].split(","))
 
      for i in range(0,ncast):
@@ -284,7 +287,7 @@ def createmodel():
 
      j=j+3
 
-###Production Companies
+     ######Production Companies#######
      
      
      npc=len(movie[j].split(":")[1].split(","))
@@ -306,7 +309,7 @@ def createmodel():
                   hits[dict_prodcomp[temp]]=1
 
      j=j-2
-###Year
+     #######Year######
      
      movie_vector[N-1]=int(float(movie[j].split(":")[1]))
      
@@ -319,7 +322,7 @@ def createmodel():
            avg[i]=total_profit[i]/total_count[i]
            hits[i]=(hits[i]*1.0)/total_count[i]
   
-###Output Y,X in a file for analysis in R
+  #########Output Y,X in a file for analysis and visualizations in R########
   fR=open('data.txt','w')
   import copy
   line=copy.deepcopy(feature)
@@ -344,47 +347,58 @@ def createmodel():
           fR.write(Movie_gross[i])      
 
   
-  
+     
+  #######Train the logisic regression or linear SVM model using scikit learn 
       
   import numpy as np
-  
+  from sklearn import cross_validation 
   from sklearn.svm import LinearSVC
   from sklearn.linear_model import LogisticRegression 
   from sklearn.metrics import roc_auc_score
-  
-  svm = LogisticRegression(C=0.5, penalty='l1', dual=False, fit_intercept=True)
 
-  #svm = LinearSVC(C=0.15, penalty='l1', loss='l2', dual=False, fit_intercept=True)
-  
-  
-  n_samples = len(X)  
- #Split data into train and test sets
-  X_train, y_train = X[:n_samples*4 / 5], Y[:n_samples*4 / 5]
-  X_test, y_test = X[n_samples *4/ 5:], Y[n_samples*4 / 5:]
+  ######### Train L1-regularized logistic or linear SVM, where the C value has been finetuned to 
+  ######### find the point where AUC from cross-validation is maximum ##########
+  #svm = LogisticRegression(C=0.8, penalty='l1', dual=False, fit_intercept=True)
 
+  svm = LinearSVC(C=0.5, penalty='l1', loss='l2', dual=False, fit_intercept=True)
+   
+  ##############Sample a training set while holding out 20% of the data for testing (evaluating) classifier###############
+  X_train, X_test, y_train, y_test = cross_validation.train_test_split(X, Y, test_size=0.2, random_state=0)
+  
+
+  ############# K-fold cross validation##########
+  scores = cross_validation.cross_val_score(svm, X_train, y_train, cv=5,scoring='roc_auc')
+  print("Mean and Standard deviation of AUC from cross-validation: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
+  
   svm_model = svm.fit(X_train, y_train) 
-
   print "Percentage accuracy on test data: " +str(svm_model.score(X_test,y_test)*100)
-  pickle.dump(svm, open("svm_model", 'wb'))
+  pickle.dump(svm, open("model", 'wb'))
   ypredict=svm_model.predict(X_test)
-  y_score=svm_model.decision_function(X_test)
-  print "AUC:" + str(roc_auc_score(y_test, y_score))
+  y_score=svm_model.decision_function(X_test)  ##### Target scores like probability estimates of the positive class
+  print "AUC on test data:" + str(roc_auc_score(y_test, y_score))
   
-  #itemindex = np.where(svm_model.coef_!=0)
-  #coeff=svm_model.coef_[0].tolist()
-  #itemindex=itemindex[1]
-    
-  #imp_feature={} 
-  #for i in range(0,len(itemindex)):
-  #    imp_feature[feature[itemindex[i]]]=coeff[itemindex[i]]
+  ########### Identifying non-zero co-efficients in the model ######### 
+  itemindex = np.where(svm_model.coef_!=0)
+  coeff=svm_model.coef_[0].tolist()
+  itemindex=itemindex[1]
+  print len(itemindex)
   
-  #for i in range(0,len(coeff)):
-      #imp_feature[feature[i]]=coeff[i]
-  #fout = open('feat_rank_svc.csv', 'w')
+  imp_feature={} 
+  for i in range(0,len(itemindex)):
+      imp_feature[feature[itemindex[i]]]=coeff[itemindex[i]]
+  
+  for i in range(0,len(coeff)):
+      imp_feature[feature[i]]=coeff[i]
+
+  fout = open('feat_rank_svc.csv', 'w')
   #fout = open('feat_rank_logistic.csv', 'w') 
   #for key, value in sorted(imp_feature.iteritems(), key=lambda (k,v): (v,k),reverse=True):
       #fout.write( "%s, %s"  % (key, value)+"\n")
-  #for i in range(N):
-       #fout.write("%s, %s, %s, %s, %s" % (feature[i],coeff[i],avg[i],hits[i],total_count[i])+"\n")
+
+  fout.write("%s, %s, %s, %s, %s,%s" % ("feature","type","coeff","avg_revenue","avg_hits","total_movie_appearances")+"\n")
+  for i in range(N):
+       fout.write("%s, %s, %s, %s, %s" % (feature[i],coeff[i],avg[i],hits[i],total_count[i])+"\n")
+
+
 createmodel()  
 

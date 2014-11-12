@@ -1,3 +1,7 @@
+##Reads the movies from movie-info.txt  and the corresponding information about features
+## to create a list of features comprising names of actors, directors, producers, genres, countries, languages, and production companies. Saves the features in ##the corresponding file names.Ex: “actor.txt” contains names of all actors who appear as predictors in the model.
+
+
 import math
 
 def union():
@@ -99,7 +103,7 @@ def union():
            companies[temp] = companies[temp] + 1
      else:
            companies[temp] = 1
-     
+### Keeping only those actors, directors etc. as features for the model that appear in at least 4 movies.      
   for i in actors.keys():
       if (actors[i] > 3):
          f_actor.write(i+"\n")
@@ -113,13 +117,13 @@ def union():
       if (genres[i] > 3):
          f_genres.write(i+"\n")
   for i in countries.keys():
-      if (countries[i] > 5):
+      if (countries[i] > 3):
          f_county.write(i+"\n")
   for i in languages.keys():
-      if (languages[i] > 5):
+      if (languages[i] > 3):
          f_lang.write(i+"\n")
   for i in companies.keys():
-      if (companies[i] > 5):
+      if (companies[i] > 3):
          f_comp.write(i+"\n")
 
 print "starting..."

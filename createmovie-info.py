@@ -1,9 +1,12 @@
+### Reads the names of movies collected from wikipedia and stored in movie_names.txt
+### For each movie it collects information from IMDB database (using the imdb python api ### library) and saves in movie-info.txt
+
 import imdb
 
   
 
 def create_movie_info():
-  f=open("./movies-years.txt", "r")   
+  f=open("./movie_names.txt", "r")   
   
   sentences = f.readlines()
   ia=imdb.IMDb()
@@ -42,6 +45,8 @@ def create_movie_info():
 
       for index in range(0,len(cast)):
          casts[cast[index]]=0
+
+      ####temporarily store movie-related info obtained from the imdb API into dictionary of lists
       movie_dict = {}
       movie_object = movie
       movie_dict["cast"]=[]
@@ -78,6 +83,8 @@ def create_movie_info():
       bget=float(bget.replace(',',''))
       movie_dict["budget"]=bget
 
+      ###### write movie_dict information into file
+  
       info = title;
       for keys,values in movie_dict.items():
         info = info +"\t" + str(keys)+":"+str(values);
